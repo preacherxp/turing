@@ -3,7 +3,6 @@ import { useState } from "react";
 import InstructionsTable from "./components/InstructionsTable";
 import MemoryTape from "./components/MemoryTape";
 import StateRegister from "./components/StateRegister";
-import CustomCreator from "./components/CustomCreator";
 import DataLoad from "./components/DataLoad";
 import Hero from "./components/Hero";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
@@ -23,22 +22,35 @@ function App() {
   const [stateRegister, setStateRegister] = useState([]);
   const [filename, setFilename] = useState("");
 
+  function removeFile() {
+    setInstructionsTable([]);
+    setMemoryTape(null);
+    setAlphabet(null);
+    setFilename("");
+  }
+
   function handleDataUpload(e) {
     e.persist();
     const reader = new FileReader();
-
     reader.readAsText(e.target.files[0]);
+
     reader.onload = function (event) {
-      const turingData = JSON.parse(event.target.result);
-      const { instructionsTable, memoryTape, alphabet } = turingData;
-      if (instructionsTable && memoryTape && alphabet) {
-        setFilename(e.target.files[0].name);
-        setInstructionsTable(instructionsTable);
-        setMemoryTape(memoryTape);
-        setAlphabet(alphabet);
-      } else {
+      try {
+        const turingData = JSON.parse(event.target.result);
+        const { instructionsTable, memoryTape, alphabet } = turingData;
+        if (instructionsTable && memoryTape && alphabet) {
+          setFilename(e.target.files[0].name);
+          setInstructionsTable(instructionsTable);
+          setMemoryTape(memoryTape);
+          setAlphabet(alphabet);
+        } else {
+          document.getElementById("file").value = null;
+          alert("wrong file format");
+        }
+      } catch (e) {
+        console.log(e);
         document.getElementById("file").value = null;
-        alert("error");
+        alert("wrong file format");
       }
     };
   }
@@ -48,8 +60,7 @@ function App() {
     setInstructionsTable([]);
     setMemoryTape(null);
     setAlphabet(null);
-    setFilename('');
-
+    setFilename("");
   }
 
   return (
@@ -67,11 +78,6 @@ function App() {
             control={<Radio />}
             label="Import from file (.json/.txt)"
           />
-          {/* <FormControlLabel
-            value="custom"
-            control={<Radio />}
-            label="Custom machine"
-          /> */}
         </RadioGroup>
 
         {radio === "example" && (
@@ -81,8 +87,13 @@ function App() {
             setAlphabet={setAlphabet}
           />
         )}
-        {radio === "file" && <DataLoad handleDataUpload={handleDataUpload} filename={filename} />}
-        {radio === "custom" && <CustomCreator />}
+        {radio === "file" && (
+          <DataLoad
+            handleDataUpload={handleDataUpload}
+            filename={filename}
+            removeFile={removeFile}
+          />
+        )}
 
         <Grid
           style={{ padding: 20 }}
