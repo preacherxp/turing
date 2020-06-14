@@ -1,0 +1,12 @@
+.dataloadWrapper {
+  display: flex;
+  justify-content: space-evenly;
+  width: 33%;
+}
+
+.uploadLabel {
+  & + input {
+    display: none;
+  }
+  cursor: pointer;
+}
