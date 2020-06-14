@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { binaryAdder, numberAdder, simpleTest } from "./TuringExamples";
+import {
+  numberSubstractor,
+  numberAdder,
+  numberAdder2,
+  simpleTest,
+} from "./TuringExamples";
 import { Select, MenuItem } from "@material-ui/core";
 
 export default function ExamplesSelector({
@@ -9,12 +14,12 @@ export default function ExamplesSelector({
   setAlphabet,
   ...props
 }) {
-  const [example, setExample] = useState("simpleTest");
+  const [example, setExample] = useState("numberSubstractor");
 
   useEffect(() => {
-    setInstructionsTable(simpleTest.instructionsTable);
-    setMemoryTape(simpleTest.memoryTape);
-    setAlphabet(simpleTest.alphabet);
+    setInstructionsTable(numberSubstractor.instructionsTable);
+    setMemoryTape(numberSubstractor.memoryTape);
+    setAlphabet(numberSubstractor.alphabet);
   }, [setAlphabet, setInstructionsTable, setMemoryTape]);
 
   function handleChange(e) {
@@ -25,15 +30,20 @@ export default function ExamplesSelector({
         setMemoryTape(simpleTest.memoryTape);
         setAlphabet(simpleTest.alphabet);
         break;
-      case "binaryAdder":
-        setInstructionsTable(binaryAdder.instructionsTable);
-        setMemoryTape(binaryAdder.memoryTape);
-        setAlphabet(binaryAdder.alphabet);
+      case "numberSubstractor":
+        setInstructionsTable(numberSubstractor.instructionsTable);
+        setMemoryTape(numberSubstractor.memoryTape);
+        setAlphabet(numberSubstractor.alphabet);
         break;
       case "numberAdder":
         setInstructionsTable(numberAdder.instructionsTable);
         setMemoryTape(numberAdder.memoryTape);
         setAlphabet(numberAdder.alphabet);
+        break;
+      case "numberAdder2":
+        setInstructionsTable(numberAdder2.instructionsTable);
+        setMemoryTape(numberAdder2.memoryTape);
+        setAlphabet(numberAdder2.alphabet);
         break;
       default:
         break;
@@ -43,8 +53,9 @@ export default function ExamplesSelector({
     <div>
       <Select value={example} onChange={handleChange}>
         <MenuItem value={"simpleTest"}>Simple test</MenuItem>
-        <MenuItem value={"binaryAdder"}>Binary adder</MenuItem>
+        <MenuItem value={"numberSubstractor"}>Number substractor</MenuItem>
         <MenuItem value={"numberAdder"}>Number adder</MenuItem>
+        <MenuItem value={"numberAdder2"}>Number adder 2</MenuItem>
       </Select>
     </div>
   );

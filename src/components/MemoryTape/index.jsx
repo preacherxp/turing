@@ -31,36 +31,49 @@ export default function MemoryTape({
     setCurrentStep(Number(e.target.value));
   }
 
-  useEffect(() => {
+  function setNewTape() {
+    resetTuring();
     setTransformedTape([...memoryTape]);
+  }
+
+  useEffect(() => {
+    setNewTape();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memoryTape]);
 
   function runTuring() {
     resetTuring();
     let currentIndex = startingIndex;
-    const tempTape = [...memoryTape];
+    let autoStep = 0;
 
     const modifyElement = function () {
-      const currentElement = tempTape[currentIndex];
+      const currentElement = transformedTape[currentIndex];
 
-      const currentInstruction = instructionsTable[
-        currentState
-      ].symbolActions.find((action) => action.current === currentElement);
-      tempTape[currentIndex] = currentInstruction.new;
+      const currentInstruction = instructionsTable[autoStep].symbolActions.find(
+        (action) => action.current === currentElement
+      );
 
-      setCurrentState(currentInstruction.next);
-      if (currentInstruction.move === "R") currentIndex += 1;
-      if (currentInstruction.move === "L") currentIndex -= 1;
+      if (currentInstruction?.move === "STOP") {
+        setStopSignal(true);
+        setMessage({ state: true, text: "Machine finished" });
+        return;
+      }
 
-      setTransformedTape(tempTape);
-      setStateRegister((prev) => [
-        ...prev,
-        {
-          ...currentInstruction,
-        },
-      ]);
+      if (currentInstruction) {
+        transformedTape[currentIndex] = currentInstruction.new;
+        autoStep = currentInstruction.next;
+        if (currentInstruction.move === "R") currentIndex += 1;
+        if (currentInstruction.move === "L") currentIndex -= 1;
 
-      if (currentInstruction.new === "STOP") {
+        setTransformedTape(transformedTape);
+        setStateRegister((prev) => [
+          ...prev,
+          {
+            ...currentInstruction,
+          },
+        ]);
+      } else {
+        setMessage({ state: true, text: "Instruction error" });
         setStopSignal(true);
       }
     };
@@ -70,7 +83,7 @@ export default function MemoryTape({
     while (
       stepsAmount <= 1000 &&
       currentIndex >= 0 &&
-      currentIndex < tempTape.length - 1 &&
+      currentIndex < transformedTape.length &&
       !stopSignal
     ) {
       if (stepsAmount < 1000) {
@@ -84,41 +97,36 @@ export default function MemoryTape({
     setMessage({ state: true, text: "Machine finished" });
   }
   function nextStep() {
-    if (currentStep === 0) {
-      resetTuring();
-    }
-
     const modifyElement = function () {
       const currentElement = transformedTape[currentStep];
 
       const currentInstruction = instructionsTable[
         currentState
       ].symbolActions.find((action) => action.current === currentElement);
-      transformedTape[currentStep] = currentInstruction.new;
 
-      setCurrentState(currentInstruction.next);
-      if (currentInstruction.move === "R") setCurrentStep((prev) => prev + 1);
-      if (currentInstruction.move === "L") setCurrentStep((prev) => prev - 1);
-
-      setTransformedTape(transformedTape);
-      setStateRegister((prev) => [
-        ...prev,
-        {
-          ...currentInstruction,
-        },
-      ]);
-
-      if (currentInstruction.new === "STOP") {
+      if (currentInstruction?.move === "STOP") {
         setStopSignal(true);
+        setMessage({ state: true, text: "Machine finished" });
+        return;
+      }
+
+      if (currentInstruction) {
+        transformedTape[currentStep] = currentInstruction.new;
+        setCurrentState(currentInstruction.next);
+        if (currentInstruction.move === "R") setCurrentStep((prev) => prev + 1);
+        if (currentInstruction.move === "L") setCurrentStep((prev) => prev - 1);
+
+        setTransformedTape(transformedTape);
+        setStateRegister((prev) => [
+          ...prev,
+          {
+            ...currentInstruction,
+          },
+        ]);
       }
     };
 
     modifyElement();
-
-    if (currentStep === transformedTape.length - 2) {
-      setMessage({ state: true, text: "Machine finished" });
-      setStopSignal(true);
-    }
   }
 
   function resetTuring() {
@@ -153,7 +161,9 @@ export default function MemoryTape({
 
           <Typography>
             Current state <br />
-            q{instructionsTable[currentState].stateNumber}
+            {currentState === "STOP"
+              ? "STOP"
+              : `q${instructionsTable[currentState].stateNumber}`}
           </Typography>
         </CardContent>
       </Card>
@@ -196,13 +206,28 @@ export default function MemoryTape({
       </Card>
       <Card>
         <CardContent>
-          <Button disabled={stopSignal} variant="contained" onClick={nextStep}>
+          <Button
+            style={{ marginRight: "8px" }}
+            disabled={currentState === "STOP"}
+            variant="contained"
+            onClick={nextStep}
+          >
             Next Step
           </Button>
-          <Button variant="contained" color="primary" onClick={runTuring}>
+          <Button
+            style={{ marginRight: "8px" }}
+            variant="contained"
+            color="primary"
+            onClick={runTuring}
+          >
             Run
           </Button>
-          <Button variant="contained" color="secondary" onClick={resetTuring}>
+          <Button
+            style={{ marginRight: "8px" }}
+            variant="contained"
+            color="secondary"
+            onClick={resetTuring}
+          >
             Reset
           </Button>
         </CardContent>
