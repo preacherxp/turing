@@ -40,12 +40,9 @@ export default function InstructionsTable({
                     if (element) {
                       return (
                         <TableCell key={idx}>
-                          <div className="">
-                            Current element: {element.current}
-                          </div>
-                          <div className="">New element: {element.new}</div>
-                          <div className="">Next state: {element.next}</div>
-                          <div className="">Head movement: {element.move}</div>
+                          <div className="">New: {element.new}</div>
+                          <div className="">Next: q{element.next}</div>
+                          <div className="">Move: {element.move}</div>
                         </TableCell>
                       );
                     } else {
